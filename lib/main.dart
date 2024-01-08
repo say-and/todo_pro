@@ -15,7 +15,7 @@ class Sqflite extends StatefulWidget {
 
 class _SqfliteState extends State<Sqflite> {
   bool isLoading = true;
-  List<Map<String, dynamic>> note_from_db = [];
+  List<Map<String, dynamic>> noteFromDb = [];
 
   @override
   void initState() {
@@ -24,9 +24,9 @@ class _SqfliteState extends State<Sqflite> {
   }
 
   void refreshData() async {
-    final datas = await SQLHelper.readNotes();
+    final data = await SQLHelper.readNotes();
     setState(() {
-      note_from_db = datas;
+      noteFromDb = data;
       isLoading = false;
     });
   }
@@ -35,31 +35,31 @@ class _SqfliteState extends State<Sqflite> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('ToDo List'),
+          title: const Text('ToDo List'),
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : ListView.builder(
-                itemCount: note_from_db.length,
+                itemCount: noteFromDb.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
-                      title: Text("${note_from_db[index]['title']}"),
-                      subtitle: Text("${note_from_db[index]['note']}"),
+                      title: Text("${noteFromDb[index]['title']}"),
+                      subtitle: Text("${noteFromDb[index]['note']}"),
                       trailing: SizedBox(
                         width: 100,
                         child: Row(
                           children: [
                             IconButton(
                                 onPressed: () {
-                                  showForm(note_from_db[index]['id']);
+                                  showForm(noteFromDb[index]['id']);
                                 },
-                                icon: Icon(Icons.edit)),
+                                icon: const Icon(Icons.edit)),
                             IconButton(
                                 onPressed: () {
-                                  deleteNote(note_from_db[index]['id']);
+                                  deleteNote(noteFromDb[index]['id']);
                                 },
-                                icon: Icon(Icons.delete)),
+                                icon: const Icon(Icons.delete)),
                           ],
                         ),
                       ),
@@ -68,7 +68,7 @@ class _SqfliteState extends State<Sqflite> {
                 }),
         floatingActionButton: FloatingActionButton(
           onPressed: () => showForm(null),
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
         ));
   }
 
@@ -77,7 +77,7 @@ class _SqfliteState extends State<Sqflite> {
 
   void showForm(int? id) async {
     if (id != null) {
-      final existingNote = note_from_db.firstWhere((note) => note['id'] == id);
+      final existingNote = noteFromDb.firstWhere((note) => note['id'] == id);
       title.text = existingNote['title'];
       note.text = existingNote['note'];
     }
@@ -96,28 +96,29 @@ class _SqfliteState extends State<Sqflite> {
                 children: [
                   TextField(
                       controller: title,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           hintText: "Title", border: OutlineInputBorder())),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   TextField(
                     controller: note,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         hintText: "Enter notes", border: OutlineInputBorder()),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                  const SizedBox(height: 10),
                   ElevatedButton(
-                    onPressed: () async {
+                    onPressed: () {
                       if (id == null) {
-                        await addNote();
+                        addNote(title.text, note.text);
+                        title.clear();
+                        note.clear();
+                        Navigator.of(context).pop();
                       }
                       if (id != null) {
-                        await updateNote(id);
-                        title.text = "";
-                        note.text = "";
+                        updateNote(id, title.text, note.text);
+                        title.clear();
+                        note.clear();
                         Navigator.of(context).pop();
                       }
                     },
@@ -128,13 +129,13 @@ class _SqfliteState extends State<Sqflite> {
             ));
   }
 
-  Future addNote() async {
-    await SQLHelper.createNote(title.text, note.text);
+  Future addNote(String title, String note) async {
+    await SQLHelper.createNote(title, note);
     refreshData();
   }
 
-  Future<void> updateNote(int id) async {
-    await SQLHelper.updateNote(id, title.text, note.text);
+  Future<void> updateNote(int id, String title, String note) async {
+    await SQLHelper.updateNote(id, title, note);
     refreshData();
   }
 

@@ -4,11 +4,9 @@ import 'package:sqflite/sqflite.dart' as sql;
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE notes(
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    title TEXT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,    title TEXT,
     note TEXT,
-    createAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )""");
+    createAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP    )""");
   }
 
   static Future<sql.Database> myData() async {
@@ -39,7 +37,7 @@ class SQLHelper {
       'createAt': DateTime.now().toString()
     };
     final result =
-        await db.update('note', newdata, where: "id=?", whereArgs: [id]);
+        await db.update("notes", newdata, where: "id=?", whereArgs: [id]);
     return result;
   }
 
